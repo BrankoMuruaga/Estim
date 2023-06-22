@@ -1,0 +1,103 @@
+import juegos.*
+import estim.*
+import paises.*
+import descuentos.*
+import criticas.*
+
+describe "Test sobre Estim"{
+	const juegos = []
+	const posiblesPrecios = [10, 20, 30, 40, 50, 60, 70, 80, 90, 100]
+	const posiblesCaracteristicas = [
+		["lenguajeInapropiado", "situacionesViolentas", "tematicaParaAdultos"],
+		["lenguajeInapropiado", "situacionesViolentas"],
+		["lenguajeInapropiado","tematicaParaAdultos"],
+		["situacionesViolentas", "tematicaParaAdultos"],
+		["situacionesViolentas"],
+		["lenguajeInapropiado"],
+		["tematicaParaAdultos"]
+	]
+	
+	
+	method initialize(){
+		self.agregar_JuegosAEstim(10)
+		self.agregar_CriticasDeUsuariosAJuegosDeEstim(5)
+		self.agregar_CriticasPagasAJuegosDeEstim(3)
+		self.agregar_CriticasDeRevistaAJuegosDeEstim(4)
+	}
+	
+	
+	
+	method agregar_CriticasDeUsuariosAJuegosDeEstim(unNumero){
+		estim.juegos().forEach{j => self.crear_CriticasDeUsuariosA_(unNumero, j)}
+	}
+	
+	method agregar_CriticasPagasAJuegosDeEstim(unNumero){
+		estim.juegos().forEach{j => self.crear_CriticasPagasA_(unNumero, j)}
+	}
+	
+	method agregar_CriticasDeRevistaAJuegosDeEstim(unNumero){
+		estim.juegos().forEach{j => self.crear_CriticasDeRevistaA_(unNumero, j)}
+	}
+	
+	method crear_CriticasDeUsuariosA_(unNumero, unJuego){
+		(1.. unNumero).forEach{n =>
+			if(unNumero > n){
+				unJuego.registarCritica(new CriticaDeUsuario(esPositiva = 0.randomUpTo(10) > 5))
+			}
+		}
+	}
+	
+	method crear_CriticasPagasA_(unNumero, unJuego){
+		unJuego.registarCritica(
+			new CriticaPaga(
+							juegoACriticar = unJuego,
+							juegosPagados = self.juegosAleatoriosDeLaListaDeJuegos()
+							))
+	}
+	
+	method crear_CriticasDeRevistaA_(unNumero, unJuego){
+		const criticaDerevista = new CriticaDeRevista()
+		(1.. 10).forEach{n =>
+			if(10 > n){
+				criticaDerevista.agregarCritico(
+					new CriticaDeUsuario(esPositiva = 0.randomUpTo(10) > 5)
+				)	
+			}
+		}
+		(1.. 10).forEach{n =>
+			if(10 > n){
+				criticaDerevista.agregarCritico(
+					new CriticaPaga(
+							juegoACriticar = unJuego,
+							juegosPagados = self.juegosAleatoriosDeLaListaDeJuegos()
+							)
+				)	
+			}
+		}
+		
+		unJuego.registarCritica(criticaDerevista)
+	}
+	
+	method juegosAleatoriosDeLaListaDeJuegos() = juegos.filter{j => 0.randomUpTo(10) > 5}
+	
+	method crear_juegos(unNumero){
+		(1.. unNumero).forEach{n =>
+			if(unNumero > n){
+				juegos.add(new Juego(
+					precioDeLista = posiblesPrecios.anyOne(),
+					caracteristicas = posiblesCaracteristicas.anyOne()
+				))
+			}
+		}
+	}
+	
+	method agregar_JuegosAEstim(unNumero){
+		self.crear_juegos(unNumero)
+		juegos.forEach{ j => estim.agregarJuego(j)}
+		
+	}
+	
+	test "es juego galardonado"{
+		assert.equals(estim.juegos().first(), estim.juegoGalardonado())
+	}
+}
