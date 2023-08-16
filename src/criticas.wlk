@@ -6,6 +6,7 @@ import descuentos.*
 class Critica{
 	method esPositiva()
 	method texto()
+	method prueba() = "hola"
 }
 
 
